@@ -102,7 +102,8 @@ exit
 ```bash
 astro dev run dags unpause snowpark_demo
 astro dev run dags trigger snowpark_demo
-  
+```
+
 7. Connect to the Local [Airflow UI](http://localhost:8080/dags/snowpark_demo/grid) and login with **Admin/Admin**  
 
 8. As the DAG runs notice that the XCOM values in the Airflow UI only contain URIs and not the actual data.  
