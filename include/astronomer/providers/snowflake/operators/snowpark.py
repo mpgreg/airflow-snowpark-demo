@@ -283,7 +283,7 @@ class _BaseSnowparkOperator(_BasePythonVirtualenvOperator):
             render_template_as_native_obj=False,
         )
 
-        print(script_path.read_text())
+        # print(script_path.read_text())
 
         try:
             execute_in_subprocess(
