@@ -53,7 +53,7 @@ def snowpark_provider_demo():
                                 F.col('DROPOFF_LOCATION_ID').cast(T.StringType()).alias('DROPOFF_LOCATION_ID'),
                                 F.col('HOUR'), 
                                 F.col('TRIP_DISTANCE'), 
-                                F.col('TRIP_DURATION_SEC'))\
+                                F.col('TRIP_DURATION_SEC'))
 
     @snowpark_virtualenv_task(python_version='3.9')
     def feature_engineering(taxidf:SnowparkTable) -> SnowparkTable:
