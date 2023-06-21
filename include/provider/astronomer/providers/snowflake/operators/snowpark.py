@@ -154,7 +154,7 @@ class _BaseSnowparkOperator(_BasePythonVirtualenvOperator):
     
         if temp_data_output == 'stage':
             assert temp_data_stage, "temp_data_stage must be specified if temp_data_output='stage'"
-
+        
         super().__init__(
             python_callable=python_callable,
             use_dill=use_dill,

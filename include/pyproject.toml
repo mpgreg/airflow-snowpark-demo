@@ -1,39 +1,21 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "astro-provider-snowflake"
-dynamic = ["version"]
-description = "Scalable and Secure Snowflake Workflows in Apache Airflow"
-#readme = "README.md"
-license = "Apache-2.0"
-requires-python = ">=3.7"
-packages = [{include = "astronomer.providers.snowflake", from = "provider"}]
-
+name = "astro-provider-snowpark"
 authors = [
-    { name = "Astronomer", email = "humans@astronomer.io" },
+    {name = "Michael Gregory", email = "michael.gregory@astronomer.io"},
 ]
-keywords = [
-    "airflow",
-    "apache-airflow",
-    "astronomer",
-    "dags",
-]
+license = {text = "Apache License 2.0"}
+description = "Scalable and Secure Snowflake Workflows in Apache Airflow"
 classifiers = [
-    "Development Status :: 3 - Alpha",
     "Framework :: Apache Airflow",
     "Framework :: Apache Airflow :: Provider",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
 ]
+urls = {Source = "https://github.com/astronomer/astro-provider-snowpark"}
+dynamic = ["version"]
+requires-python = "~=3.7"
 dependencies = [
     "aiohttp>=3.8.4",
     "snowflake-connector-python[pandas]>=3.0.4",
@@ -43,115 +25,51 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-docs = [
-    "pydata_sphinx_theme",
-    "sphinx",
-    "sphinx-autobuild",
-    "sphinx-tabs"
-]
 docker = [
     "docker-compose>=1.29.2"
 ]
 tests = [
-    "pytest>=6.0",
-    "pytest-split",
-    "pytest-dotenv",
-    "requests-mock",
-    "pytest-cov",
-    "pytest-describe",
-    "types-requests",
-    "mypy",
-    "sqlalchemy-stubs", # Change when sqlalchemy is upgraded https://docs.sqlalchemy.org/en/14/orm/extensions/mypy.html
+    "pytest>=7.0",
 ]
 
-[project.urls]
-Homepage = "https://github.com/astronomer/astro-provider-snowflake/"
-Documentation = "https://github.com/astronomer/astro-provider-snowflake/"
+#[project.readme]
+#file = "README.md"
+#content-type = "text/markdown"
 
-[tool.hatch.version]
-path = "provider/astronomer/providers/snowflake/__init__.py"
+[project.entry-points.apache_airflow_provider]
+provider_info = "astronomer.providers.snowflake:get_provider_info"
 
-[tool.hatch.envs.test]
-dependencies = [
-    "pytest",
-    "pytest-cov",
-]
+[tool.setuptools]
+include-package-data = false
 
-[tool.hatch.envs.docs]
-dependencies = [
-    "sphinx",
-    "sphinx-autobuild",
-    "sphinx-tabs"
-]
-[tool.hatch.envs.docs.scripts]
-build = "sphinx-build -b html docs docs/_build"
-serve = "sphinx-autobuild docs docs/_build"
+[tool.setuptools.package-data]
+"astronomer.providers.snowflake.operators" = ["*.jinja2"]
 
-[tool.hatch.build]
-sources = ["provider"]
+[tool.setuptools.dynamic]
+version = {attr = "astronomer.providers.snowflake.__version__"}
 
-[tool.hatch.build.targets.wheel]
-include = [
-  "/provider/astronomer/providers/snowflake",
-]
-
-[tool.mypy]
-strict = true
-
-
-[tool.distutils.bdist_wheel]
-universal = true
-
-
-[tool.black]
-target-version = ['py37']
-fix = true
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "--cov=provider --cov-branch --cov-report term-missing"
-testpaths = [
-    "tests",
-]
-
-
-[tool.pydocstyle]
-inherit = false
-add_ignore = "D100,D104,D105,D107,D205,D400,D401"
-convention = "pep257"
+[tool.setuptools.packages.find]
+where = ["provider"]
 
 [tool.ruff]
-line-length = 120
-
-# Enable Pyflakes `E` and `F` codes by default.
-extend-select = [
-    "W", # pycodestyle warnings
-    "I", # isort
-    "C90", # Complexity
-    #    "B",    # flake8-bugbear
-    "C", # flake8-comprehensions
-    #    "ANN",  # flake8-comprehensions
-    "ISC", # flake8-implicit-str-concat
-    "T10", # flake8-debugger
-    "A", # flake8-builtins
-    "UP", # pyupgrade
-]
-
-# Remove this in future
-extend-ignore = ["A002", "C901", "E402", "E501", "ISC001", "ISC003", "UP030"]
-
-# Exclude a variety of commonly ignored directories.
-extend-exclude = [
-    "__pycache__",
-    "docs/conf.py",
-]
-
-target-version = "py37"
 fix = true
+line-length = 110
+target-version = "py37"
+extend-select = [
+    "PGH", #pygrep-hooks
+    "UP", # Pyupgrade
+    "RUF100", # Unused noqa (auto-fixable)
+    "I",
+]
 
-[tool.ruff.mccabe]
-max-complexity = 6
-
-[tool.ruff.isort]
-combine-as-imports = true
-known-first-party = ["tests"]
+[tool.pytest.ini_options]
+addopts = "--tb=short -v"
+filterwarnings = [
+    "ignore::DeprecationWarning:apispec.utils",
+    "ignore::DeprecationWarning:connexion.decorators.validation",
+    "ignore::DeprecationWarning:marshmallow_sqlalchemy.convert",
+    "ignore::DeprecationWarning:flask_sqlalchemy",
+    "ignore::DeprecationWarning:flask_appbuilder.filemanager",
+    "ignore::DeprecationWarning:flask_appbuilder.widgets",
+    "ignore::DeprecationWarning:pkg_resources",
+]

@@ -1,20 +1,23 @@
+__version__ = "0.0.1a1"
 
-"""Description of the package"""
-
-__version__ = "0.0.1-dev0"
 
 def get_provider_info():
     return {
-        "package-name": "astro-provider-snowflake", 
-        "name": "Snowpark Airflow Provider", 
-        "description": "Decorators for Snowpark.", 
-        "hook-class-names": [
-
+        "package-name": "astro-provider-snowpark",
+        "name": "astro-provider-snowpark",
+        "description": "Snowpark Decorators.",
+        "task-decorators": [
+            {
+                "name": "snowpark_python",
+                "class-name": "astronomer.providers.snowflake.decorators.snowpark.snowpark_python_task",
+            },
+            {
+                "name": "snowpark_virtualenv",
+                "class-name": "astronomer.providers.snowflake.decorators.snowpark.snowpark_virtualenv_task",
+            },
+            {
+                "name": "snowpark_ext_python",
+                "class-name": "astronomer.providers.snowflake.decorators.snowpark.snowpark_ext_python_task",
+            },
         ],
-        "extra-links": [
-            ".decorators.snowpark.snowpark_python_task",
-            ".decorators.snowpark.snowpark_virtualenv_task",
-            ".decorators.snowpark.snowpark_ext_python_task"
-        ],
-        "versions": ["0.0.1-dev0"],
     }

@@ -2,19 +2,6 @@ from datetime import datetime
 from airflow.decorators import dag, task, task_group
 from astro import sql as aql
 from astro.files import File 
-
-from include.provider.astronomer.providers.snowflake.decorators.snowpark import (
-    snowpark_python_task,
-    snowpark_ext_python_task,
-    snowpark_virtualenv_task,
-)
-
-from include.provider.astronomer.providers.snowflake.operators.snowpark import (
-    SnowparkPythonOperator, 
-    SnowparkExternalPythonOperator, 
-    SnowparkVirtualenvOperator
-)
-
 from astro.sql.table import Table 
 from include.provider.astronomer.providers.snowflake.utils.snowpark_helpers import SnowparkTable
 
@@ -55,7 +42,7 @@ def snowpark_provider_demo():
                                 F.col('TRIP_DISTANCE'), 
                                 F.col('TRIP_DURATION_SEC'))
 
-    @snowpark_virtualenv_task(python_version='3.9')
+    @task.snowpark_virtualenv(python_version='3.9')
     def feature_engineering(taxidf:SnowparkTable) -> SnowparkTable:
         from sklearn.preprocessing import MaxAbsScaler
         import pandas as pd
@@ -73,7 +60,7 @@ def snowpark_provider_demo():
         
         return snowpark_session.create_dataframe(taxidf)
 
-    @snowpark_ext_python_task(python=_SNOWPARK_BIN)
+    @task.snowpark_ext_python(python=_SNOWPARK_BIN)
     def train(featuredf:SnowparkTable) -> bytes:
         from sklearn.linear_model import LinearRegression
         from sklearn.model_selection import train_test_split
@@ -92,7 +79,7 @@ def snowpark_provider_demo():
 
         return pickle.dumps(lr)
         
-    @snowpark_virtualenv_task(python_version='3.9')
+    @task.snowpark_virtualenv(python_version='3.9')
     def predict(featuredf:SnowparkTable, model:bytes) -> SnowparkTable:
         import pickle
 
