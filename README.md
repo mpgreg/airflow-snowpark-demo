@@ -2,7 +2,7 @@
   <img src="include/images/AirflowLogo.png" width="200">
   <img src="include/images/SnowparkLogo.png" width="200" /> 
 </p>
-  
+    
 ### Status: This feature is currently in development and should __not be used with production data__.
   
 # Airflow Provider for Snowpark
@@ -44,8 +44,7 @@ PYENV 3.8 snowpark requirements-snowpark.txt
 ```
 
 ## Package
-# TODO
-The provider package is available at https://github.com/mpgreg/airflow-snowpark-demo/blob/main/include/astro_provider_snowflake-0.0.1.dev-py3-none-any.whl
+While in development the provider package is not yet in pypi.  For this demo the provider is installed from a wheel file in `airflow-snowpark-demo/include/dist/astro_provider_snowpark-0.0.1a1-py3-none-any.whl' and can be used in other projects by copying this file.
   
 # Demonstration
 The following demo has been created to show the use of this provider and leverages the Astro CLI to create a local dev instance of Airflow.
