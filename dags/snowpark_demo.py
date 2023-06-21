@@ -43,7 +43,7 @@ def snowpark_provider_demo():
                 if_exists='replace'
             )
         
-    @snowpark_ext_python_task(python=_SNOWPARK_BIN)
+    @task.snowpark_ext_python(python=_SNOWPARK_BIN)
     def transform(raw_table:SnowparkTable) -> SnowparkTable:
 
         return raw_table.with_column('TRIP_DURATION_SEC',
