@@ -9,7 +9,7 @@ def setup(hook:SnowflakeHook, database:str='DEMO', schema='XCOM', stage='XCOM_ST
     hook.run(f'''
         CREATE DATABASE IF NOT EXISTS {database};
         CREATE SCHEMA IF NOT EXISTS {database}.{schema};
-        CREATE OR REPLACE STAGE {database}.{schema}.{stage};
+        CREATE OR REPLACE STAGE {database}.{schema}.{stage} DIRECTORY = (ENABLE = TRUE) ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
         CREATE OR REPLACE TABLE {database}.{schema}.{table} 
                                 ( 
                                     dag_id varchar NOT NULL, 

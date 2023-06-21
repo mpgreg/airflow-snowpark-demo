@@ -1,22 +1,22 @@
 from datetime import datetime
 from airflow.decorators import dag, task, task_group
-from astro import sql as aql 
+from astro import sql as aql
 from astro.files import File 
 
-from include.astronomer.providers.snowflake.decorators.snowpark import (
+from include.provider.astronomer.providers.snowflake.decorators.snowpark import (
     snowpark_python_task,
     snowpark_ext_python_task,
     snowpark_virtualenv_task,
 )
 
-from include.astronomer.providers.snowflake.operators.snowpark import (
+from include.provider.astronomer.providers.snowflake.operators.snowpark import (
     SnowparkPythonOperator, 
     SnowparkExternalPythonOperator, 
     SnowparkVirtualenvOperator
 )
 
 from astro.sql.table import Table 
-from include.astronomer.providers.snowflake.utils.snowpark_helpers import SnowparkTable
+from include.provider.astronomer.providers.snowflake.utils.snowpark_helpers import SnowparkTable
 
 @dag(dag_id='snowpark_demo', 
      default_args={

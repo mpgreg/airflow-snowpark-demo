@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 
 from airflow.exceptions import AirflowException
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
-from include.astronomer.providers.snowflake.utils.snowpark_helpers import SnowparkTable
-from include.astronomer.providers.snowflake.utils.xcom_helpers import _try_parse_snowflake_xcom_uri, get_snowflake_xcom_objects
+from ..utils.snowpark_helpers import SnowparkTable
+from ..utils.xcom_helpers import _try_parse_snowflake_xcom_uri, get_snowflake_xcom_objects
 
 try:
     from astro.files import File
@@ -49,7 +49,7 @@ def _write_to_snowflake(
     run_id: str,
 ):
 
-    #Other downstream systems such as Snowpark Container operator or Snowpark operator may have serialized to 
+    #Other downstream systems such as Snowpark operators may have serialized to 
     # Snowflake already. Check for a valid xcom URI in return value and pass it through.
     if _try_parse_snowflake_xcom_uri(value):
         return value

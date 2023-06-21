@@ -4,7 +4,7 @@ from typing import Callable, Sequence
 
 from airflow.decorators.base import DecoratedOperator, TaskDecorator, task_decorator_factory
 
-from include.astronomer.providers.snowflake.operators.snowpark import (
+from ..operators.snowpark import (
     SnowparkVirtualenvOperator, 
     SnowparkExternalPythonOperator,
     SnowparkPythonOperator

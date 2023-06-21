@@ -18,11 +18,18 @@ try:
 except: 
     Table = TempTable = None
 
-from include.astronomer.providers.snowflake.utils.snowpark_helpers import (
-    SnowparkTable,
-    _deserialize_snowpark_args,
-    _serialize_snowpark_results
-)
+try: 
+    from astronomer.providers.snowflake.utils.snowpark_helpers import (
+        SnowparkTable,
+        _deserialize_snowpark_args,
+        _serialize_snowpark_results
+    )
+except:
+    from include.provider.astronomer.providers.snowflake.utils.snowpark_helpers import (
+        SnowparkTable,
+        _deserialize_snowpark_args,
+        _serialize_snowpark_results
+    )
 
 conn_params = {{ conn_params }}
 temp_data_dict = {{ temp_data_dict }}

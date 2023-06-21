@@ -26,7 +26,7 @@ from airflow.exceptions import (
 
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 
-from include.astronomer.providers.snowflake.utils.snowpark_helpers import (
+from ..utils.snowpark_helpers import (
     SnowparkTable,
     _try_parse_snowflake_xcom_uri,
     _is_table_arg,
