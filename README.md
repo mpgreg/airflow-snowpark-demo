@@ -3,7 +3,7 @@
   <img src="include/images/SnowparkLogo.png" width="200" /> 
 </p>
     
-### Status: This feature is currently in development and should __not be used with production data__.
+### Status: This provider is currently in development and should not be used with production data.
   
 # Airflow Provider for Snowpark
 This guide demonstrates using Apache Airflow to orchestrate a machine learning pipeline leveraging Airflow Operators and Decorators for Snowpark Python as well as a new customer XCOM backend using Snowflake tables and stages.  While this demo shows both the operators and the xcom backend either can be used without the other.
@@ -14,40 +14,30 @@ At a high level [Astronomer's Snowflake Provider](https://github.com/astronomer/
 
 Example:
 ```python
-@snowpark_python_task(task_id='feature_engineering', temp_data_output='stage', temp_data_stage='MY_STAGE')
-def feature_engineering(taxidf:SnowparkTable) -> SnowparkTable:
+@task.snowpark_python(task_id='feature_engineering', temp_data_output='stage', temp_data_stage='MY_STAGE')
+def feature_engineering(taxidf:SnowparkTable) -> list[SnowparkTable]:
 
-		taxidf = taxidf.with_column('HOUR_OF_DAY', F.col('HOUR').cast(T.StringType()))
+	taxidf = taxidf.with_column('HOUR_OF_DAY', F.col('HOUR').cast(T.StringType()))
 
-        new_df = snowpark_session.create_dataframe(pd.DataFrame(['x','y'], columns=['name']))
+  new_df = snowpark_session.create_dataframe(pd.DataFrame(['x','y'], columns=['name']))
 
-    return taxidf, newdf
+  return [taxidf, newdf]
 ```
   
 All operators include the following functionality:  
 -  __Snowpark Session__: A session instance called `snowpark_session` is automatically created (using Airflow Snowflake connection parameters) and can be referenced by user python code.
 -  __SnowparkTable Object__: A new datatype was created that represents a SnowparkTable. This is serializable and can be passed between tasks. Any arguments of the python function which are annotated as `SnowparkTable` will be automatically instantiated as Snowpark Dataframes in the users code. Additionally the SnowparkTable is interchangeable with [Astro SDK Table and TempTable](https://github.com/astronomer/astro-sdk/tree/main) objects.
--  __Snowpark Dataframe serialization and deserialization__: Snowpark Dataframes returned from python functions can be serialized to a Snowflake table or stage as set in `temp_data_output = 'stage'|'table'|None`. The database and stage used for serialization can optionally be set in `temp_data_database` and `temp_data_schema`.  If these are not set the provider will use the database/schema as set in Operator/Decorator parameters, the Airlfow Snowflake connection and lastly the default database/schema in Snowflake user settings.  Snowpark Dataframes serialized to stage will be saved as Parquet files.  Table/Stage data will be deserialized automatically as Snowpark Dataframes in the receiving task.
+-  __Snowpark Dataframe serialization and deserialization__: Snowpark Dataframes returned from python functions can be automatically serialized to a Snowflake table or stage as set in `temp_data_output = 'stage'|'table'|None`. The database and stage used for serialization can optionally be set in `temp_data_database` and `temp_data_schema`.  If these are not set the provider will use the database/schema as set in Operator/Decorator parameters, the Airlfow Snowflake connection and lastly the default database/schema in Snowflake user settings.  Snowpark Dataframes serialized to stage will be saved as Parquet files.  Table/Stage data will be deserialized automatically as Snowpark Dataframes in the receiving task.
 
 See [below](#available-snowpark-operators-and-decorators) for a list of all Operators and Decorators.
   
 -  __The custom XCOM backend__: To provide additional security and data governance the Snowflake XCOM backend allows storing task input and output in Snowflake. Rather than storing potentially-sensitive data in the Airflow XCom tables Snowflake users can now ensure that all their data stays in Snowflake.  This also allows passing large data and/or non-serializable data (ie. Pandas dataframes) between tasks. JSON-serializable data is stored in an XCom table and large or non-serializable data is stored as objects in a Snowflake stage.
 
--  __Docker Buildkit__: Due to Snowpark python version dependencies it may be necessary to create a python virtual environment for the Snowpark client.  Astronomer has created a [Docker buildkit](https://github.com/astronomer/astro-provider-venv) to drastically simplify building this environment with a new `PYENV` function.  The PYENV creation is also cached in Docker layers which reduces time in building images.
-Example: 
-```Dockerfile
-# syntax=quay.io/astronomer/airflow-extensions:latest
-
-FROM quay.io/astronomer/astro-runtime:8.5.0-base
-
-PYENV 3.8 snowpark requirements-snowpark.txt
-```
-
 ## Package
-While in development the provider package is not yet in pypi.  For this demo the provider is installed from a wheel file in `airflow-snowpark-demo/include/dist/astro_provider_snowpark-0.0.1a1-py3-none-any.whl' and can be used in other projects by copying this file.
+While in development the provider package is not yet in pypi.  For this demo the provider is installed from a wheel file in `include/astro_provider_snowflake-0.0.1.dev1-py3-none-any.whl' and can be used in other projects by copying this file.
   
 # Demonstration
-The following demo has been created to show the use of this provider and leverages the Astro CLI to create a local dev instance of Airflow.
+The following demo has been created to show the use of this provider and leverages the Astronomer Runtime and Astro CLI to create a local dev instance of Airflow.
 
 ## Prerequisites  
   
@@ -72,22 +62,25 @@ curl -sSL install.astronomer.io | sudo bash -s
 
 2. Clone this repository:
 ```bash
-git clone https://github.com/mpgreg/airflow-snowpark-demo
+git clone https://github.com/astronomer/airflow-snowpark-demo
 cd airflow-snowpark-demo
 ```
   
-3. Setup Snowflake account credentials as environment variables.  Edit the `.env` file and update `AIRFLOW_CONN_SNOWFLAKE_DEFAULT` with your credentials.  This demo will use a database named `demo` which will be setup below.
+3. Save your Snowflake account credentials as environment variables. Edit the following strings with your account information and run the export command in the terminal window where you will run the remaining commands.
+```bash
+export AIRFLOW_CONN_SNOWFLAKE_DEFAULT='{"conn_type": "snowflake", "login": "USER_NAME", "password": "PASSWORD", "schema": "demo", "extra": {"account": "ORG_NAME-ACCOUNT_NAME", "warehouse": "WAREHOUSE_NAME", "database": "demo", "region": "REGION_NAME", "role": "USER_ROLE", "authenticator": "snowflake", "session_parameters": null, "application": "AIRFLOW"}}'
+```
 
 4.  Start Apache Airflow:
 ```sh
 astro dev start
 ```  
 
-5. Connect to the Airflow Scheduler container.
+5. Connect to the Airflow Scheduler container to setup Snowflake objects for the demo.
 ```bash
 astro dev bash -s
 ```
-Setup the Snowflake database, schema, tables, etc for this demo.  This must be run as a user with admin priveleges.  Alternatively look at the setup scripts and have a Snowflake administrator create these objects and grant permissions.
+Setup the Snowflake database, schema, tables, etc for this demo.  This must be run as a user with admin priveleges.  Alternatively use an existing database and schema or look at the setup scripts and have a Snowflake administrator create these objects and grant permissions.
 ```bash
 python include/utils/setup_snowflake.py \
   --conn_id 'snowflake_default' \

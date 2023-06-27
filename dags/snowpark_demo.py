@@ -3,11 +3,14 @@ from airflow.decorators import dag, task, task_group
 from astro import sql as aql
 from astro.files import File 
 from astro.sql.table import Table 
-from include.provider.astronomer.providers.snowflake.utils.snowpark_helpers import SnowparkTable
+from astronomer.providers.snowflake.utils.snowpark_helpers import SnowparkTable
 
 @dag(dag_id='snowpark_demo', 
      default_args={
-         "temp_data_output": 'table',
+         "database": "DEMO",
+         "schema": "DEMO",
+         "temp_data_output": "table",
+         "temp_data_db": "DEMO",
          "temp_data_schema": 'XCOM',
          "temp_data_overwrite": True},
      schedule_interval=None, 
@@ -18,7 +21,7 @@ def snowpark_provider_demo():
     _SNOWPARK_BIN = '/home/astro/.venv/snowpark/bin/python'
 
     ingest_files=['yellow_tripdata_sample_2019_01.csv', 'yellow_tripdata_sample_2019_02.csv']
-    raw_table = Table(name='TAXI_RAW', conn_id=_SNOWFLAKE_CONN_ID)
+    raw_table = Table(name='TAXI_RAW', metadata={'database':'demo', 'schema':'demo'}, conn_id=_SNOWFLAKE_CONN_ID)
 
     @task_group()
     def load():
@@ -30,7 +33,7 @@ def snowpark_provider_demo():
                 if_exists='replace'
             )
         
-    @task.snowpark_ext_python(python=_SNOWPARK_BIN)
+    @task.snowpark_python()
     def transform(raw_table:SnowparkTable) -> SnowparkTable:
 
         return raw_table.with_column('TRIP_DURATION_SEC',
@@ -42,7 +45,7 @@ def snowpark_provider_demo():
                                 F.col('TRIP_DISTANCE'), 
                                 F.col('TRIP_DURATION_SEC'))
 
-    @task.snowpark_virtualenv(python_version='3.9')
+    @task.snowpark_virtualenv(python_version='3.8')
     def feature_engineering(taxidf:SnowparkTable) -> SnowparkTable:
         from sklearn.preprocessing import MaxAbsScaler
         import pandas as pd
@@ -105,7 +108,7 @@ def snowpark_provider_demo():
 
     _rawdf = load() 
 
-    _taxidf = transform(raw_table = SnowparkTable(name=raw_table.name))
+    _taxidf = transform(raw_table = raw_table)
 
     _featuredf = feature_engineering(_taxidf)
 
